@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traductor Dactilológico</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: #f0f0f0;
+      margin: 0;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    /* Cambiamos 'input' por 'textarea' para aplicar estilos */
+    textarea, button, select {
+      margin: 10px;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    #salida {
+      margin-top: 20px;
+      padding: 20px;
+      background: white;
+      display: inline-block;
+      border: 2px solid #ccc;
+      min-height: 100px;
+      width: 90%; /* Usamos 'width' en lugar de 'max-width' para consistencia */
+      word-wrap: break-word;
+      text-align: left; /* Alineamos el texto a la izquierda para mejor lectura */
+    }
+
+    /* Cargar tu fuente dactilológica */
+    @font-face {
+      font-family: 'Dactilologico';
+      /* Asegúrate de que el archivo 'dactilo.ttf' esté en la misma carpeta */
+      src: url('dactilo.ttf') format('truetype');
+    }
+
+    .dactilo {
+      font-family: 'Dactilologico', sans-serif;
+      /* El tamaño inicial se establecerá con JavaScript */
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.2rem;
+      }
+      textarea, button, select {
+        width: 90%;
+        font-size: 1rem;
+      }
+      #salida {
+        width: 90%;
+        /* Eliminamos 'font-size' de aquí para que el JavaScript lo controle siempre */
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Traductor a Alfabeto Dactilológico</h1>
+
+  <textarea id="entrada" rows="4" placeholder="Escribe un texto..."></textarea>
+  <br>
+
+  <label for="tamanio">Tamaño de letra:</label>
+  <select id="tamanio">
+    <option value="12">12 px</option>
+    <option value="16">16 px</option>
+    <option value="24">24 px</option>
+    <option value="32">32 px</option>
+    <option value="48" selected>48 px</option>
+    <option value="64">64 px</option>
+    <option value="80">80 px</option>
+    <option value="100">100 px</option>
+    <option value="120">120 px</option>
+    <option value="150">150 px</option>
+    <option value="200">200 px</option>
+    <option value="250">250 px</option>
+    <option value="300">300 px</option>
+  </select>
+
+  <div id="salida" class="dactilo"></div>
+  <br>
+
+  <button id="descargar">📥 Descargar PDF</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    const entrada = document.getElementById('entrada');
+    const salida = document.getElementById('salida');
+    const select = document.getElementById('tamanio');
+    const botonPDF = document.getElementById('descargar');
+
+    // Función para actualizar la salida (texto y tamaño)
+    function actualizarSalida() {
+      // CAMBIO 2: Reemplazar saltos de línea (\n) por etiquetas <br>
+      // Usamos innerHTML para que el navegador interprete el <br> como un salto de línea.
+      const textoConSaltos = entrada.value.replace(/\n/g, '<br>');
+      salida.innerHTML = textoConSaltos;
+    }
+    
+    // Función para actualizar el tamaño de la fuente
+    function actualizarTamanio() {
+        salida.style.fontSize = select.value + "px";
+    }
+
+    // Traducir en tiempo real
+    entrada.addEventListener('input', actualizarSalida);
+
+    // Cambiar tamaño de letra con select
+    select.addEventListener('change', actualizarTamanio);
+
+    // Descargar como PDF
+    botonPDF.addEventListener('click', () => {
+      // Ocultamos el borde para que no salga en el PDF y se vea mejor
+      salida.style.border = 'none'; 
+      html2pdf().from(salida).set({
+        margin: 10,
+        filename: 'traduccion.pdf',
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: 'portrait' }
+      }).save().then(() => {
+        // Volvemos a mostrar el borde después de generar el PDF
+        salida.style.border = '2px solid #ccc'; 
+      });
+    });
+    
+    // CAMBIO 3: Aplicar el tamaño inicial al cargar la página
+    actualizarTamanio();
+
+  </script>
+</body>
+</html>
